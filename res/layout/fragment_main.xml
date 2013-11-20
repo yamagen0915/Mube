@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="10dp" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="vertical" >
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageLogo"
+            android:scaleType="centerInside"
+            android:src="@drawable/mube_log_with_title" />
+
+        <EditText
+            android:id="@+id/editMainSearchMovie"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/btnMainSearch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="検索" />
+    </LinearLayout>
+
+</RelativeLayout>
