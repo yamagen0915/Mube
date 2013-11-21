@@ -6,14 +6,16 @@ import android.app.ListFragment;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.gen.mube.ImageDownloadTask.OnImageDownloadListener;
@@ -21,40 +23,86 @@ import com.gen.mube.YouTubeSearchTask.YouTubeSearchListener;
 import com.gen.mube.utils.Utils;
 import com.gen.mube.utils.YouTubeUtils;
 import com.gen.mube.utils.YouTubeUtils.YouTubeItem;
+import com.gen.mube.utils.YouTubeUtils.YouTubeParams;
 import com.google.android.youtube.player.YouTubeStandalonePlayer;
 
 public class MovieListFragment extends ListFragment {
 	
 	public static final String SEARCH_WORD = "searchWord";
 	
+	private int page = 0;
+	private String[] searchWords = new String[]{};
+	
+	private MovieAdapter adapter;
+	
+	private boolean isDownloading = false;
+	
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		getListView().setOnScrollListener(onScroll);
+		getListView().setBackground(
+				getResources().getDrawable(R.color.lite_gray));
+		getListView().setDivider(
+				getResources().getDrawable(R.color.white));
+	}
+	
 	public void searchMovie(String searchWord) {
-		String[] searchWords = Utils.splitSearchWrods(searchWord);
+		searchWords = Utils.splitSearchWrods(searchWord);
+		YouTubeParams params = new YouTubeParams.Builder(searchWords)
+			.build();
+		
 		new YouTubeSearchTask()
 			.setYouTubeSearchListener(onYouTubeSearch)
-			.execute(searchWords);
+			.execute(params);
 	}
-	
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		// ListViewの背景を白くするためにこうしている。
-		View view = inflater.inflate(R.layout.fragment_movie_list, container, false);
-		return view;
-	}
-	
-	@Override
-	public void onListItemClick(ListView l, View v, int position, long id) {
-		super.onListItemClick(l, v, position, id);
-	}
+
+	private final OnScrollListener onScroll = new OnScrollListener() {
+
+		@Override
+		public void onScrollStateChanged(AbsListView view, int scrollState) {
+		}
+
+		@Override
+		public void onScroll(AbsListView view, int firstVisibleItem,
+				int visibleItemCount, int totalItemCount) {
+
+			// 一番したまでスクロールした訳でないなら何もしない
+			if (totalItemCount != firstVisibleItem + visibleItemCount) return;
+			
+			// 既に追加読み込みを始めていたら何もしない
+			if (isDownloading) return;
+
+			isDownloading = true;
+			page++;
+
+			YouTubeParams params = new YouTubeParams.Builder(searchWords)
+				.page(page)
+				.build();
+
+			new YouTubeSearchTask()
+				.setYouTubeSearchListener(onYouTubeSearch)
+				.execute(params);
+		}
+
+	};
 	
 	private final YouTubeSearchListener onYouTubeSearch = new YouTubeSearchListener() {
 
 		@Override
 		public void onResult(List<YouTubeItem> results) {
-			final MovieAdapter adapter = new MovieAdapter(getActivity(), results);
-			setListAdapter(adapter);
+			
+			isDownloading = false;
+			
+			adapter = (MovieAdapter) getListAdapter();
+			if (adapter == null) {
+				adapter = new MovieAdapter(getActivity());
+				setListAdapter(adapter);
+			}
 			
 			// サムネイル画像の取得
 			for (final YouTubeItem item : results) {
+				adapter.add(item);
 				new ImageDownloadTask()
 					.setOnImageDownloadListener(new OnImageDownloadListener() {
 						@Override
@@ -73,8 +121,8 @@ public class MovieListFragment extends ListFragment {
 		
 		private LayoutInflater inflater;
 		
-		public MovieAdapter(Context context, List<YouTubeItem> objects) {
-			super(context, 0, 0, objects);
+		public MovieAdapter(Context context) {
+			super(context, 0);
 			inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		}
 

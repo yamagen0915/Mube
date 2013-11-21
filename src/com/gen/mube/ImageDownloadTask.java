@@ -36,10 +36,6 @@ public class ImageDownloadTask extends AsyncTask<String, Void, Bitmap> {
 		return this;
 	}
 	
-	public interface OnImageDownloadListener {
-		public void onDownload(Bitmap bitmap);
-	}
-	
 	private static Bitmap fetchImageFromUrl(String imageUrl) {
         byte[] result = getByteArrayFromUrl(imageUrl);
         Bitmap image = null;
@@ -106,5 +102,9 @@ public class ImageDownloadTask extends AsyncTask<String, Void, Bitmap> {
 
         return result;
      }
+    
+	public static interface OnImageDownloadListener {
+		public void onDownload(Bitmap bitmap);
+	}
 
 }

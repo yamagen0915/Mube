@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
@@ -31,8 +32,7 @@ public class YouTubeUtils {
 	 * @param searchWords
 	 * @return YouTube APIのレスポンスをそのまま返す。JSON形式。
 	 */
-	public static String searchMovie (List<String> searchWords) {
-		YouTubeParams params = new YouTubeParams.Builder(searchWords).build();
+	public static String searchMovie (YouTubeParams params) {
 		return sendGetRequest(VIDEOS_URL + "?" + params);
 	}
 	
@@ -127,7 +127,7 @@ public class YouTubeUtils {
 		private List<String> q;
 		private String alt;
 		private String orderBy;
-		private int startIndex;
+		private int page;
 		private int maxResults;
 		private int version;
 		
@@ -135,14 +135,14 @@ public class YouTubeUtils {
 			this.q 		 	= builder.q;
 			this.alt		= builder.alt;
 			this.orderBy 	= builder.orderBy;
-			this.startIndex = builder.startIndex;
+			this.page		= builder.page;
 			this.maxResults = builder.maxResults;
 			this.version	= builder.version;
 		} 
 		
 		public List<String> getQ() { return q; }
 		public String getOrderBy() { return orderBy; }
-		public int getStartIndex() { return startIndex; }
+		public int getPage()       { return page; }
 		public int getMaxResults() { return maxResults; }
 		public int getVersion()    { return version; }
 		
@@ -153,6 +153,8 @@ public class YouTubeUtils {
 			urlParams.append("q").append("=").append(listToGetParams(q)).append("&");
 			urlParams.append("alt").append("=").append(alt).append("&");
 			urlParams.append("orderby").append("=").append(orderBy).append("&");
+			
+			int startIndex = (page * maxResults) + 1;
 			urlParams.append("start-index").append("=").append(startIndex).append("&");
 			urlParams.append("max-results").append("=").append(maxResults).append("&");
 			urlParams.append("v").append("=").append(version);
@@ -181,7 +183,7 @@ public class YouTubeUtils {
 			// オプションパラメータ
 			private String alt	   = "json";
 			private String orderBy = "published";
-			private int startIndex = 1;
+			private int page	   = 0;
 			private int maxResults = 30;
 			private int version    = 2;
 			
@@ -189,12 +191,16 @@ public class YouTubeUtils {
 				this.q = q;
 			}
 			
+			public Builder (String[] q) {
+				this.q = Arrays.asList(q);
+			}
+			
 			public Builder alt (String alt)
 				{ this.alt = alt; return this; }
 			public Builder orderBy (String orderBy) 	
 				{ this.orderBy = orderBy; return this; }
-			public Builder startIndex (int startIndex) 
-				{ this.startIndex = startIndex; return this; }
+			public Builder page (int startIndex) 
+				{ this.page = startIndex; return this; }
 			public Builder maxResults (int maxResults) 
 				{ this.maxResults = maxResults; return this; }
 			public Builder version (int version) 

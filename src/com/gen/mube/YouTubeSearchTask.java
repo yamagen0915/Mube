@@ -10,19 +10,20 @@ import org.json.JSONObject;
 
 import android.os.AsyncTask;
 
-import com.gen.mube.interfaces.OnApiResultListener;
 import com.gen.mube.utils.YouTubeUtils;
 import com.gen.mube.utils.YouTubeUtils.YouTubeItem;
-import com.google.android.youtube.player.internal.e;
+import com.gen.mube.utils.YouTubeUtils.YouTubeParams;
 
-public class YouTubeSearchTask extends AsyncTask<String, Void, List<YouTubeItem>>{
+public class YouTubeSearchTask extends AsyncTask<YouTubeParams, Void, List<YouTubeItem>>{
 	
 	private YouTubeSearchListener listener;
 	
 	@Override
-	protected List<YouTubeItem> doInBackground(String... searchWords) {
-		List<String> searchWordsList = Arrays.asList(searchWords);
-		String jsonStr = YouTubeUtils.searchMovie(searchWordsList);
+	protected List<YouTubeItem> doInBackground(YouTubeParams... params) {
+		
+		if (params == null || params.length <= 0) return new ArrayList<YouTubeItem>();
+		
+		String jsonStr = YouTubeUtils.searchMovie(params[0]);
 		
 		try {
 			JSONObject json   = new JSONObject(jsonStr);
@@ -107,7 +108,7 @@ public class YouTubeSearchTask extends AsyncTask<String, Void, List<YouTubeItem>
 		JSONArray thumbnails = group.getJSONArray("media$thumbnail");
 		
 		if (thumbnails.length() <= 0) return "";
-		JSONObject thumbnail = thumbnails.getJSONObject(0);
+		JSONObject thumbnail = thumbnails.getJSONObject(1);
 		
 		if (thumbnail.isNull("url")) return "";
 		

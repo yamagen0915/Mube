@@ -104,6 +104,7 @@ public class MainActivity extends Activity {
 				movieListFragment.searchMovie(text);
 				
 				FragmentTransaction transaction = getFragmentManager().beginTransaction();
+				
 				transaction.replace(R.id.relativeMain, movieListFragment);
 				transaction.addToBackStack(null);  
 				transaction.commit();
